@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FCOL · Accounts</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:"Poppins",sans-serif; }
+    body {
+      background:#f9f7f2;
+      min-height:100vh;
+      display:flex;
+    }
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width:72px;
+      background:white;
+      border-right:1px solid rgba(176,44,58,0.12);
+      padding:1.5rem 0.75rem;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:2.5rem;
+      height:100vh;
+      position:sticky;
+      top:0;
+      z-index:40;
+      box-shadow:2px 0 12px rgba(0,0,0,0.02);
+      transition:width 0.2s ease;
+      overflow:hidden;
+      flex-shrink:0;
+    }
+    .sidebar:hover {
+      width:200px;
+      align-items:flex-start;
+      padding:1.5rem 1rem;
+    }
+    .sidebar:hover .nav-label {
+      opacity:1;
+      width:auto;
+      margin-left:0.75rem;
+    }
+    .sidebar:hover .logo-text {
+      opacity:1;
+      width:auto;
+      margin-left:0.5rem;
+    }
+    .logo-mini {
+      display:flex;
+      align-items:center;
+      width:100%;
+      white-space:nowrap;
+      font-weight:700;
+      color:#a82b36;
+      font-size:1.6rem;
+    }
+    .logo-mini .icon {
+      width:40px;
+      height:40px;
+      flex-shrink:0;
+      border-radius:50% 20% 50% 10%;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#f9f7f2;
+      box-shadow:0 4px 10px rgba(0,0,0,0.04);
+    }
+    .logo-mini .icon img {
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .logo-text {
+      font-size:0.85rem;
+      letter-spacing:-0.3px;
+      opacity:0;
+      transition:opacity 0.2s ease;
+      width:0;
+      overflow:hidden;
+      white-space:nowrap;
+    }
+    .sidebar:hover .logo-text { opacity:1; width:auto; }
+
+    .nav-label {
+      opacity:0;
+      transition:opacity 0.2s ease;
+      white-space:nowrap;
+      font-size:0.9rem;
+      font-weight:500;
+      color:#5a4e3a;
+      width:0;
+      overflow:hidden;
+    }
+    .sidebar:hover .nav-label { opacity:1; width:auto; }
+
+    .nav-section {
+      display:flex;
+      flex-direction:column;
+      gap:0.75rem;
+      width:100%;
+    }
+    .nav-btn {
+      display:flex;
+      align-items:center;
+      gap:0.5rem;
+      padding:0.6rem 0.8rem;
+      border-radius:40px 12px 40px 12px;
+      background:transparent;
+      border:none;
+      width:100%;
+      cursor:pointer;
+      font-weight:500;
+      color:#7f6b3a;
+      transition:0.15s;
+      white-space:nowrap;
+      font-size:0.9rem;
+    }
+    .nav-btn .nav-icon {
+      font-size:1.4rem;
+      line-height:1;
+      width:28px;
+      text-align:center;
+      flex-shrink:0;
+    }
+    .nav-btn:hover { background:#f3efe6; color:#a82b36; }
+    .nav-btn.active {
+      background:#b02c3a;
+      color:white;
+      box-shadow:0 4px 12px rgba(176,44,58,0.25);
+    }
+    .nav-btn.active .nav-label { color:white; }
+    .sidebar-footer {
+      margin-top:auto;
+      font-size:0.7rem;
+      color:#b8aa92;
+      text-align:center;
+      white-space:nowrap;
+      opacity:0;
+      transition:opacity 0.2s;
+    }
+    .sidebar:hover .sidebar-footer { opacity:1; }
+
+    /* main content */
+    .main-content {
+      flex:1;
+      padding:2rem 1.5rem;
+      max-width:1280px;
+      margin:0 auto;
+      width:100%;
+      position:relative;
+      overflow-x:hidden;
+    }
+    .deco-circle-top {
+      position:fixed;
+      top:-60px;
+      right:-60px;
+      width:170px;
+      height:170px;
+      border-radius:50%;
+      background:linear-gradient(145deg,#b02c3a,#d44a5a);
+      border:2px solid rgba(176,44,58,0.10);
+      pointer-events:none;
+      z-index:10;
+      box-shadow:0 0 80px rgba(176,44,58,0.08);
+      backdrop-filter:blur(2px);
+    }
+    .deco-circle-top::after {
+      content:'';
+      position:absolute;
+      top:30px;
+      left:30px;
+      width:80px;
+      height:80px;
+      border-radius:50%;
+      background:radial-gradient(circle,rgba(176,44,58,0.10),transparent 70%);
+    }
+    .deco-circle-bottom {
+      position:fixed;
+      bottom:-80px;
+      right:-80px;
+      width:280px;
+      height:280px;
+      border-radius:80%;
+      background:linear-gradient(145deg,#b02c3a,#d44a5a);
+      border:2px solid rgba(176,44,58,0.08);
+      pointer-events:none;
+      z-index:10;
+      box-shadow:0 0 100px rgba(176,44,58,0.06);
+      backdrop-filter:blur(2px);
+    }
+    .deco-circle-bottom::after {
+      content:'';
+      position:absolute;
+      bottom:40px;
+      right:40px;
+      width:100px;
+      height:100px;
+      border-radius:50%;
+      background:radial-gradient(circle,rgba(176,44,58,0.08),transparent 70%);
+    }
+    .dashboard-wrapper {
+      width:100%;
+      position:relative;
+      z-index:20;
+    }
+    .admin-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      flex-wrap:wrap;
+      gap:1rem 1.5rem;
+      margin-bottom:2.5rem;
+      background:white;
+      padding:1.25rem 2rem;
+      border-radius:40px 12px 40px 12px;
+      box-shadow:0 8px 24px rgba(0,0,0,0.02);
+      border:1px solid rgba(176,44,58,0.12);
+    }
+    .admin-header-left {
+      display:flex;
+      align-items:center;
+      gap:0.75rem;
+      flex-wrap:wrap;
+    }
+    .admin-header-left .logo-icon {
+      width:44px;
+      height:44px;
+      border-radius:50% 20% 50% 10%;
+      overflow:hidden;
+      flex-shrink:0;
+      background:#f9f7f2;
+      box-shadow:0 6px 12px rgba(176,44,58,0.20);
+    }
+    .admin-header-left .logo-icon img {
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+    .admin-header-left h1 {
+      font-size:1.6rem;
+      font-weight:600;
+      color:#a82b36;
+      letter-spacing:-0.3px;
+    }
+    .admin-header-left span.sub {
+      font-weight:400;
+      color:#7f6b3a;
+      font-size:0.9rem;
+      background:#f3efe6;
+      padding:0.2rem 1rem;
+      border-radius:40px;
+      margin-left:0.5rem;
+    }
+    .admin-header-right {
+      display:flex;
+      align-items:center;
+      gap:1.2rem;
+      flex-wrap:wrap;
+    }
+    .admin-header-right .badge {
+      background:#f3efe6;
+      padding:0.4rem 1.2rem;
+      border-radius:60px;
+      font-size:0.8rem;
+      color:#5a4e3a;
+      border:1px solid #eae3d4;
+    }
+    .admin-header-right .avatar {
+      width:40px;
+      height:40px;
+      border-radius:50%;
+      background:#b02c3a;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:white;
+      font-weight:600;
+      font-size:1rem;
+      box-shadow:0 4px 8px rgba(176,44,58,0.2);
+    }
+
+    /* table card */
+    .table-card {
+      background:white;
+      border-radius:32px 12px 32px 12px;
+      padding:1.5rem 1.2rem;
+      border:1px solid rgba(176,44,58,0.08);
+      box-shadow:0 4px 12px rgba(0,0,0,0.01);
+      backdrop-filter:blur(2px);
+    }
+    .table-card .card-title {
+      font-size:1rem;
+      font-weight:600;
+      color:#5a4e3a;
+      display:flex;
+      align-items:center;
+      gap:0.5rem;
+      margin-bottom:1.2rem;
+      border-bottom:2px solid #f3efe6;
+      padding-bottom:0.6rem;
+      flex-wrap:wrap;
+    }
+    .table-card .card-title .emoji-badge {
+      background:#b02c3a;
+      color:white;
+      width:28px;
+      height:28px;
+      border-radius:50% 10% 50% 10%;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:0.9rem;
+      flex-shrink:0;
+    }
+    .table-card .card-title .count-badge {
+      margin-left:auto;
+      font-size:0.75rem;
+      color:#9b8a72;
+      font-weight:400;
+    }
+    .table-wrap {
+      overflow-x:auto;
+      border-radius:20px;
+      border:1px solid #f0ebe1;
+    }
+    table {
+      width:100%;
+      border-collapse:collapse;
+      font-size:0.85rem;
+      min-width:700px;
+    }
+    th {
+      background:#fcf6f4;
+      color:#5a4e3a;
+      font-weight:600;
+      padding:0.9rem 0.8rem;
+      text-align:left;
+      border-bottom:2px solid #b02c3a;
+      white-space:nowrap;
+    }
+    td {
+      padding:0.8rem 0.8rem;
+      border-bottom:1px solid #f0ebe1;
+      color:#2b2418;
+      vertical-align:middle;
+    }
+    tr:hover td { background:#fcfaf5; }
+    .status-badge {
+      display:inline-block;
+      padding:0.2rem 0.9rem;
+      border-radius:40px;
+      font-size:0.7rem;
+      font-weight:500;
+      white-space:nowrap;
+    }
+    .status-badge.pending { background:#fef3d7; color:#a82b36; }
+    .status-badge.approved { background:#e0f0e0; color:#1f6b1f; }
+    .status-badge.rejected { background:#fde0e0; color:#b33; }
+    .action-btns {
+      display:flex;
+      gap:0.4rem;
+      flex-wrap:wrap;
+    }
+    .action-btns button {
+      border:none;
+      padding:0.25rem 0.9rem;
+      border-radius:30px;
+      font-size:0.7rem;
+      font-weight:500;
+      cursor:pointer;
+      transition:0.15s;
+      background:#f3efe6;
+      color:#5a4e3a;
+      border:1px solid transparent;
+      white-space:nowrap;
+    }
+    .action-btns button:hover { transform:scale(0.96); }
+    .action-btns .view-btn { background:#b02c3a; color:white; box-shadow:0 2px 6px rgba(176,44,58,0.2); }
+    .action-btns .view-btn:hover { background:#8f2230; }
+    .action-btns .approve-btn { background:#2d8b2d; color:white; }
+    .action-btns .approve-btn:hover { background:#1f6b1f; }
+    .action-btns .reject-btn { background:#b33; color:white; }
+    .action-btns .reject-btn:hover { background:#922; }
+    .text-gold { color:#a82b36; }
+
+    /* modal overlay */
+    .modal-overlay {
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.3);
+      backdrop-filter:blur(3px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:999;
+      padding:1rem;
+      opacity:0;
+      pointer-events:none;
+      transition:0.25s;
+    }
+    .modal-overlay.open {
+      opacity:1;
+      pointer-events:auto;
+    }
+    .modal-box {
+      background:white;
+      max-width:540px;
+      width:100%;
+      border-radius:40px 12px 40px 12px;
+      padding:2rem 2rem 1.8rem;
+      box-shadow:0 30px 60px rgba(0,0,0,0.15);
+      border:1px solid rgba(176,44,58,0.10);
+      transform:scale(0.95);
+      transition:0.2s;
+      max-height:90vh;
+      overflow-y:auto;
+    }
+    .modal-overlay.open .modal-box { transform:scale(1); }
+    .modal-box .modal-title {
+      font-size:1.3rem;
+      font-weight:600;
+      color:#a82b36;
+      border-bottom:2px solid #f3efe6;
+      padding-bottom:0.5rem;
+      margin-bottom:1rem;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .modal-box .modal-title button {
+      background:none;
+      border:none;
+      font-size:1.5rem;
+      cursor:pointer;
+      color:#7f6b3a;
+      padding:0 0.5rem;
+    }
+    .modal-box .detail-row {
+      display:flex;
+      padding:0.45rem 0;
+      border-bottom:1px solid #f5f2eb;
+      font-size:0.9rem;
+      gap:0.5rem;
+    }
+    .modal-box .detail-row .label {
+      width:40%;
+      font-weight:500;
+      color:#7f6b3a;
+      flex-shrink:0;
+    }
+    .modal-box .detail-row .value {
+      width:60%;
+      color:#2b2418;
+      word-break:break-word;
+    }
+    .modal-box .detail-row .value.gold { color:#a82b36; font-weight:500; }
+    .modal-box .modal-actions {
+      display:flex;
+      gap:0.8rem;
+      margin-top:1.5rem;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .modal-box .modal-actions button {
+      padding:0.5rem 1.8rem;
+      border:none;
+      border-radius:40px;
+      font-weight:500;
+      cursor:pointer;
+      transition:0.15s;
+    }
+    .modal-box .modal-actions .close-modal { background:#f0ebe1; color:#5a4e3a; }
+    .modal-box .modal-actions .close-modal:hover { background:#e3dccf; }
+    .modal-box .modal-actions .approve-modal { background:#2d8b2d; color:white; }
+    .modal-box .modal-actions .reject-modal { background:#b33; color:white; }
+
+    /* ——— RESPONSIVE ——— */
+    @media (max-width:1024px) {
+      .main-content { padding:1.5rem 1rem; }
+      .admin-header { padding:1rem 1.5rem; }
+      .admin-header-left h1 { font-size:1.3rem; }
+    }
+
+    @media (max-width:768px) {
+      .sidebar {
+        width:56px;
+        padding:1rem 0.4rem;
+        gap:1.8rem;
+      }
+      .sidebar:hover {
+        width:160px;
+        padding:1rem 0.6rem;
+      }
+      .sidebar:hover .logo-text { font-size:0.8rem; }
+      .sidebar:hover .nav-label { font-size:0.8rem; }
+      .logo-mini .icon { width:34px; height:34px; }
+      .main-content { padding:1rem 0.7rem; }
+      .admin-header {
+        padding:0.8rem 1rem;
+        border-radius:28px 10px 28px 10px;
+        flex-direction:column;
+        align-items:stretch;
+        text-align:center;
+        gap:0.8rem;
+      }
+      .admin-header-left { justify-content:center; }
+      .admin-header-left h1 { font-size:1.2rem; }
+      .admin-header-left span.sub { font-size:0.75rem; padding:0.15rem 0.8rem; }
+      .admin-header-right { justify-content:center; }
+      .admin-header-right .badge { font-size:0.7rem; padding:0.3rem 0.8rem; }
+      .admin-header-right .avatar { width:34px; height:34px; font-size:0.85rem; }
+      .table-card { padding:1rem 0.8rem; border-radius:24px 10px 24px 10px; }
+      .table-card .card-title { font-size:0.9rem; }
+      table { font-size:0.75rem; min-width:600px; }
+      th, td { padding:0.6rem 0.5rem; }
+      .action-btns button { padding:0.2rem 0.6rem; font-size:0.65rem; }
+      .modal-box { padding:1.5rem; margin:0.5rem; }
+    }
+
+    @media (max-width:480px) {
+      .sidebar {
+        width:48px;
+        padding:0.8rem 0.3rem;
+      }
+      .sidebar:hover {
+        width:140px;
+        padding:0.8rem 0.5rem;
+      }
+      .sidebar:hover .logo-text { font-size:0.7rem; }
+      .sidebar:hover .nav-label { font-size:0.7rem; }
+      .logo-mini .icon { width:30px; height:30px; }
+      .nav-btn .nav-icon { font-size:1.2rem; width:22px; }
+      .nav-btn { padding:0.4rem 0.5rem; font-size:0.8rem; }
+      .main-content { padding:0.7rem 0.5rem; }
+      .admin-header { padding:0.6rem 0.8rem; }
+      .admin-header-left h1 { font-size:1rem; }
+      .admin-header-left .logo-icon { width:34px; height:34px; }
+      .table-card { padding:0.8rem 0.5rem; }
+      .table-card .card-title { font-size:0.8rem; }
+      .table-card .card-title .count-badge { font-size:0.65rem; }
+      table { font-size:0.65rem; min-width:480px; }
+      th, td { padding:0.4rem 0.4rem; }
+      .status-badge { font-size:0.6rem; padding:0.15rem 0.6rem; }
+      .action-btns button { padding:0.15rem 0.4rem; font-size:0.55rem; }
+      .action-btns { gap:0.25rem; }
+      .modal-box .detail-row { font-size:0.8rem; }
+      .modal-box .modal-title { font-size:1.1rem; }
+      .modal-box .modal-actions button { padding:0.4rem 1.2rem; font-size:0.8rem; }
+      .deco-circle-top, .deco-circle-bottom { display:none; }
+    }
+
+    /* scrollable table body on small screens */
+    .table-wrap::-webkit-scrollbar { height:6px; }
+    .table-wrap::-webkit-scrollbar-thumb { background:#b02c3a; border-radius:20px; }
+    .table-wrap::-webkit-scrollbar-track { background:#f0ebe1; }
+  </style>
+</head>
+<body>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="logo-mini">
+      <span class="icon"><img src="logo.png" alt="FCOL Logo" /></span>
+      <span class="logo-text">FCOL</span>
+    </div>
+    <div class="nav-section">
+      <button class="nav-btn" onclick="location.href='dashboard.html'">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Dashboard</span>
+      </button>
+      <button class="nav-btn active">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">Accounts</span>
+      </button>
+    </div>
+    <div class="sidebar-footer">v0.1</div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="main-content">
+    <div class="deco-circle-top"></div>
+    <div class="deco-circle-bottom"></div>
+
+    <div class="dashboard-wrapper">
+
+      <!-- header -->
+      <header class="admin-header">
+        <div class="admin-header-left">
+          <div class="logo-icon"><img src="logo.png" alt="FCOL Logo" /></div>
+          <h1>FCOL · Accounts</h1>
+          <span class="sub">Laguna</span>
+        </div>
+        <div class="admin-header-right">
+          <span class="badge">👤 Director</span>
+          <div class="avatar">JD</div>
+        </div>
+      </header>
+
+      <!-- Table card -->
+      <div class="table-card">
+        <div class="card-title">
+          <span class="emoji-badge">👥</span> Registered Members
+          <span class="count-badge">showing 10 of 2,483</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>City</th>
+                <th>Age / Gender</th>
+                <th>Sector</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="font-medium">Juan Dela Cruz</span></td>
+                <td>San Pedro</td>
+                <td>34 / Male</td>
+                <td>Vendors</td>
+                <td><span class="status-badge approved">Approved</span></td>
+                <td>
+                  <div class="action-btns">
+                    <button class="view-btn" onclick="openModal('juan')">View</button>
+                    <button class="approve-btn">Approve</button>
+                    <button class="reject-btn">Reject</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="font-medium">Maria Santos</span></td>
+                <td>Calamba</td>
+                <td>28 / Female</td>
+                <td>Youth</td>
+                <td><span class="status-badge pending">Pending</span></td>
+                <td>
+                  <div class="action-btns">
+                    <button class="view-btn" onclick="openModal('maria')">View</button>
+                    <button class="approve-btn">Approve</button>
+                    <button class="reject-btn">Reject</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="font-medium">Gregorio Fernandez</span></td>
+                <td>Santa Rosa</td>
+                <td>62 / Male</td>
+                <td>Seniors</td>
+                <td><span class="status-badge approved">Approved</span></td>
+                <td>
+                  <div class="action-btns">
+                    <button class="view-btn" onclick="openModal('greg')">View</button>
+                    <button class="approve-btn">Approve</button>
+                    <button class="reject-btn">Reject</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="font-medium">Luzviminda Reyes</span></td>
+                <td>Biñan</td>
+                <td>45 / Female</td>
+                <td>Kababaihan</td>
+                <td><span class="status-badge rejected">Rejected</span></td>
+                <td>
+                  <div class="action-btns">
+                    <button class="view-btn" onclick="openModal('luz')">View</button>
+                    <button class="approve-btn">Approve</button>
+                    <button class="reject-btn">Reject</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="font-medium">Ramon Aquino</span></td>
+                <td>Los Baños</td>
+                <td>31 / Male</td>
+                <td>PWDs</td>
+                <td><span class="status-badge pending">Pending</span></td>
+                <td>
+                  <div class="action-btns">
+                    <button class="view-btn" onclick="openModal('ramon')">View</button>
+                    <button class="approve-btn">Approve</button>
+                    <button class="reject-btn">Reject</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="font-medium">Cecilia Dimagiba</span></td>
+                <td>San Pablo</td>
+                <td>52 / Female</td>
+                <td>Farmers</td>
+                <td><span class="status-badge approved">Approved</span></td>
+                <td>
+                  <div class="action-btns">
+                    <button class="view-btn" onclick="openModal('cecilia')">View</button>
+                    <button class="approve-btn">Approve</button>
+                    <button class="reject-btn">Reject</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="font-medium">Fernando Bautista</span></td>
+                <td>Santa Cruz</td>
+                <td>27 / Male</td>
+                <td>LGBTQIA+</td>
+                <td><span class="status-badge pending">Pending</span></td>
+                <td>
+                  <div class="action-btns">
+                    <button class="view-btn" onclick="openModal('fernando')">View</button>
+                    <button class="approve-btn">Approve</button>
+                    <button class="reject-btn">Reject</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="font-medium">Gloria Macapagal</span></td>
+                <td>Cabuyao</td>
+                <td>41 / Female</td>
+                <td>Transport</td>
+                <td><span class="status-badge approved">Approved</span></td>
+                <td>
+                  <div class="action-btns">
+                    <button class="view-btn" onclick="openModal('gloria')">View</button>
+                    <button class="approve-btn">Approve</button>
+                    <button class="reject-btn">Reject</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="font-medium">Rogelio Sarmiento</span></td>
+                <td>Bay</td>
+                <td>58 / Male</td>
+                <td>Seniors</td>
+                <td><span class="status-badge rejected">Rejected</span></td>
+                <td>
+                  <div class="action-btns">
+                    <button class="view-btn" onclick="openModal('rogelio')">View</button>
+                    <button class="approve-btn">Approve</button>
+                    <button class="reject-btn">Reject</button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="font-medium">Andrea Villanueva</span></td>
+                <td>Alaminos</td>
+                <td>24 / Female</td>
+                <td>Youth</td>
+                <td><span class="status-badge pending">Pending</span></td>
+                <td>
+                  <div class="action-btns">
+                    <button class="view-btn" onclick="openModal('andrea')">View</button>
+                    <button class="approve-btn">Approve</button>
+                    <button class="reject-btn">Reject</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="text-xs text-[#b8aa92] text-center mt-6 border-t border-[#ece6db] pt-4 flex flex-wrap justify-center gap-4">
+        <span>Federated Civic Organization of Laguna Inc.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL ===== -->
+  <div class="modal-overlay" id="userModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>👤 User Profile</span>
+        <button onclick="closeModal()">✕</button>
+      </div>
+      <div id="modalBody">
+        <!-- dynamic content -->
+      </div>
+      <div class="modal-actions">
+        <button class="close-modal" onclick="closeModal()">Close</button>
+        <button class="approve-modal">Approve</button>
+        <button class="reject-modal">Reject</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ----- data store -----
+    const userData = {
+      juan: {
+        name: 'Juan Dela Cruz',
+        gender: 'Male',
+        age: 34,
+        civil: 'Married',
+        religion: 'Roman Catholic',
+        mobile: '09171234567',
+        email: 'juan.delacruz@email.com',
+        address: '123 Mabini St.',
+        barangay: 'Barangay 1',
+        city: 'San Pedro',
+        district: '1st District',
+        province: 'Laguna',
+        sector: 'Vendors',
+        income: '₱15,000',
+        beneficiaries: '2',
+        beneficiary_names: 'Maria, Jose',
+        beneficiary_relation: 'Children',
+        id_type: 'National ID',
+        id_photo: '(uploaded)'
+      },
+      maria: {
+        name: 'Maria Santos',
+        gender: 'Female',
+        age: 28,
+        civil: 'Single',
+        religion: 'Roman Catholic',
+        mobile: '09181234567',
+        email: 'maria.santos@email.com',
+        address: '456 Rizal Ave.',
+        barangay: 'Barangay 2',
+        city: 'Calamba',
+        district: 'Lone District of Calamba',
+        province: 'Laguna',
+        sector: 'Youth',
+        income: '₱22,000',
+        beneficiaries: '0',
+        beneficiary_names: '—',
+        beneficiary_relation: '—',
+        id_type: 'Driver\'s License',
+        id_photo: '(uploaded)'
+      },
+      greg: {
+        name: 'Gregorio Fernandez',
+        gender: 'Male',
+        age: 62,
+        civil: 'Widow',
+        religion: 'Protestant',
+        mobile: '09161234567',
+        email: 'greg.fernandez@email.com',
+        address: '789 P. Gomez St.',
+        barangay: 'Barangay 3',
+        city: 'Santa Rosa',
+        district: 'Lone District of Santa Rosa',
+        province: 'Laguna',
+        sector: 'Seniors',
+        income: '₱8,000',
+        beneficiaries: '1',
+        beneficiary_names: 'Ana',
+        beneficiary_relation: 'Spouse',
+        id_type: 'Senior Citizen ID',
+        id_photo: '(uploaded)'
+      },
+      luz: {
+        name: 'Luzviminda Reyes',
+        gender: 'Female',
+        age: 45,
+        civil: 'Married',
+        religion: 'Roman Catholic',
+        mobile: '09151234567',
+        email: 'luz.reyes@email.com',
+        address: '1010 Lakeview Dr.',
+        barangay: 'Barangay 4',
+        city: 'Biñan',
+        district: 'Lone District of Biñan',
+        province: 'Laguna',
+        sector: 'Kababaihan',
+        income: '₱18,000',
+        beneficiaries: '3',
+        beneficiary_names: 'Carlos, Luis, Rosa',
+        beneficiary_relation: 'Children',
+        id_type: 'Barangay ID',
+        id_photo: '(uploaded)'
+      },
+      ramon: {
+        name: 'Ramon Aquino',
+        gender: 'Male',
+        age: 31,
+        civil: 'Single',
+        religion: 'Roman Catholic',
+        mobile: '09191234567',
+        email: 'ramon.aquino@email.com',
+        address: '2020 Mabuhay St.',
+        barangay: 'Barangay 5',
+        city: 'Los Baños',
+        district: '2nd District',
+        province: 'Laguna',
+        sector: 'PWDs',
+        income: '₱12,000',
+        beneficiaries: '0',
+        beneficiary_names: '—',
+        beneficiary_relation: '—',
+        id_type: 'PWD ID',
+        id_photo: '(uploaded)'
+      },
+      cecilia: {
+        name: 'Cecilia Dimagiba',
+        gender: 'Female',
+        age: 52,
+        civil: 'Married',
+        religion: 'Protestant',
+        mobile: '09201234567',
+        email: 'cecilia.dimagiba@email.com',
+        address: '3030 Farm Rd.',
+        barangay: 'Barangay 6',
+        city: 'San Pablo',
+        district: '3rd District',
+        province: 'Laguna',
+        sector: 'Farmers',
+        income: '₱9,000',
+        beneficiaries: '4',
+        beneficiary_names: 'Pedro, Elena, Jose, Maria',
+        beneficiary_relation: 'Children',
+        id_type: 'HUMID ID',
+        id_photo: '(uploaded)'
+      },
+      fernando: {
+        name: 'Fernando Bautista',
+        gender: 'Male',
+        age: 27,
+        civil: 'Single',
+        religion: 'Roman Catholic',
+        mobile: '09211234567',
+        email: 'fernando.bautista@email.com',
+        address: '4040 Quezon Ave.',
+        barangay: 'Barangay 7',
+        city: 'Santa Cruz',
+        district: '4th District',
+        province: 'Laguna',
+        sector: 'LGBTQIA+',
+        income: '₱20,000',
+        beneficiaries: '0',
+        beneficiary_names: '—',
+        beneficiary_relation: '—',
+        id_type: 'National ID',
+        id_photo: '(uploaded)'
+      },
+      gloria: {
+        name: 'Gloria Macapagal',
+        gender: 'Female',
+        age: 41,
+        civil: 'Married',
+        religion: 'Roman Catholic',
+        mobile: '09221234567',
+        email: 'gloria.macapagal@email.com',
+        address: '5050 Transport Hub',
+        barangay: 'Barangay 8',
+        city: 'Cabuyao',
+        district: '2nd District',
+        province: 'Laguna',
+        sector: 'Transport',
+        income: '₱16,000',
+        beneficiaries: '2',
+        beneficiary_names: 'Mark, John',
+        beneficiary_relation: 'Children',
+        id_type: 'Driver\'s License',
+        id_photo: '(uploaded)'
+      },
+      rogelio: {
+        name: 'Rogelio Sarmiento',
+        gender: 'Male',
+        age: 58,
+        civil: 'Married',
+        religion: 'Roman Catholic',
+        mobile: '09231234567',
+        email: 'rogelio.sarmiento@email.com',
+        address: '6060 Bay Shore',
+        barangay: 'Barangay 9',
+        city: 'Bay',
+        district: '2nd District',
+        province: 'Laguna',
+        sector: 'Seniors',
+        income: '₱7,000',
+        beneficiaries: '1',
+        beneficiary_names: 'Mila',
+        beneficiary_relation: 'Spouse',
+        id_type: 'Senior Citizen ID',
+        id_photo: '(uploaded)'
+      },
+      andrea: {
+        name: 'Andrea Villanueva',
+        gender: 'Female',
+        age: 24,
+        civil: 'Single',
+        religion: 'Roman Catholic',
+        mobile: '09241234567',
+        email: 'andrea.villanueva@email.com',
+        address: '7070 Rizal St.',
+        barangay: 'Barangay 10',
+        city: 'Alaminos',
+        district: '3rd District',
+        province: 'Laguna',
+        sector: 'Youth',
+        income: '₱14,000',
+        beneficiaries: '0',
+        beneficiary_names: '—',
+        beneficiary_relation: '—',
+        id_type: 'National ID',
+        id_photo: '(uploaded)'
+      }
+    };
+
+    // ----- modal controls -----
+    const modalOverlay = document.getElementById('userModal');
+    const modalBody = document.getElementById('modalBody');
+
+    function openModal(id) {
+      const user = userData[id];
+      if (!user) return;
+      let html = '';
+      const fields = [
+        ['Full Name', user.name],
+        ['Gender', user.gender],
+        ['Age', user.age],
+        ['Civil Status', user.civil],
+        ['Religion', user.religion],
+        ['Mobile', user.mobile],
+        ['Email', user.email],
+        ['Address', user.address],
+        ['Barangay', user.barangay],
+        ['City', user.city],
+        ['District', user.district],
+        ['Province', user.province],
+        ['Sector', user.sector],
+        ['Monthly Income', user.income],
+        ['Beneficiaries', user.beneficiaries],
+        ['Beneficiary Names', user.beneficiary_names],
+        ['Relationship', user.beneficiary_relation],
+        ['ID Type', user.id_type],
+        ['ID Photo', user.id_photo]
+      ];
+      fields.forEach(([label, value]) => {
+        const valClass = (label === 'ID Photo' || label === 'Sector' || label === 'City') ? 'gold' : '';
+        html += `<div class="detail-row"><span class="label">${label}</span><span class="value ${valClass}">${value}</span></div>`;
+      });
+      modalBody.innerHTML = html;
+      modalOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      modalOverlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    modalOverlay.addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    // Modal approve/reject
+    document.querySelectorAll('.approve-modal, .reject-modal').forEach(btn => {
+      btn.addEventListener('click', function() {
+        alert('✅ ' + this.innerText + ' action (visual only)');
+        closeModal();
+      });
+    });
+
+    // Table approve/reject
+    document.querySelectorAll('.approve-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        alert('✅ Approve (visual only)');
+      });
+    });
+    document.querySelectorAll('.reject-btn').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        alert('❌ Reject (visual only)');
+      });
+    });
+  </script>
+
+</body>
+</html>

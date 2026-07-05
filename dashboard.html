@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Federated Civic · Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+    body {
+      background: #f9f7f2;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: 72px;
+      background: white;
+      border-right: 1px solid rgba(176, 44, 58, 0.12);
+      padding: 1.5rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2.5rem;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.02);
+      transition: width 0.2s ease;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .sidebar:hover {
+      width: 200px;
+      align-items: flex-start;
+      padding: 1.5rem 1rem;
+    }
+    .sidebar:hover .nav-label {
+      opacity: 1;
+      width: auto;
+      margin-left: 0.75rem;
+    }
+    .sidebar:hover .logo-text {
+      opacity: 1;
+      width: auto;
+      margin-left: 0.5rem;
+    }
+
+    .logo-mini {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      white-space: nowrap;
+      font-weight: 700;
+      color: #a82b36;
+      font-size: 1.6rem;
+    }
+    .logo-mini .icon {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      border-radius: 50% 20% 50% 10%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f9f7f2;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+    }
+    .logo-mini .icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .logo-text {
+      font-size: 0.85rem;
+      letter-spacing: -0.3px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .sidebar:hover .logo-text {
+      opacity: 1;
+      width: auto;
+    }
+
+    .nav-label {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      white-space: nowrap;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #5a4e3a;
+      width: 0;
+      overflow: hidden;
+    }
+    .sidebar:hover .nav-label {
+      opacity: 1;
+      width: auto;
+    }
+
+    .nav-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      width: 100%;
+    }
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 0.8rem;
+      border-radius: 40px 12px 40px 12px;
+      background: transparent;
+      border: none;
+      width: 100%;
+      cursor: pointer;
+      font-weight: 500;
+      color: #7f6b3a;
+      transition: 0.15s;
+      white-space: nowrap;
+      font-size: 0.9rem;
+    }
+    .nav-btn .nav-icon {
+      font-size: 1.4rem;
+      line-height: 1;
+      width: 28px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .nav-btn:hover {
+      background: #f3efe6;
+      color: #a82b36;
+    }
+    .nav-btn.active {
+      background: #b02c3a;
+      color: white;
+      box-shadow: 0 4px 12px rgba(176, 44, 58, 0.25);
+    }
+    .nav-btn.active .nav-label {
+      color: white;
+    }
+    .sidebar-footer {
+      margin-top: auto;
+      font-size: 0.7rem;
+      color: #b8aa92;
+      text-align: center;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .sidebar:hover .sidebar-footer {
+      opacity: 1;
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .main-content {
+      flex: 1;
+      padding: 2rem 1.5rem;
+      max-width: 1280px;
+      margin: 0 auto;
+      width: 100%;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .deco-circle-top {
+      position: fixed;
+      top: -60px;
+      right: -60px;
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #b02c3a, #d44a5a);
+      border: 2px solid rgba(176, 44, 58, 0.10);
+      pointer-events: none;
+      z-index: 10;
+      box-shadow: 0 0 80px rgba(176, 44, 58, 0.08);
+      backdrop-filter: blur(2px);
+    }
+    .deco-circle-top::after {
+      content: '';
+      position: absolute;
+      top: 30px;
+      left: 30px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(176, 44, 58, 0.10), transparent 70%);
+    }
+    .deco-circle-bottom {
+      position: fixed;
+      bottom: -80px;
+      right: -80px;
+      width: 280px;
+      height: 280px;
+      border-radius: 80%;
+      background: linear-gradient(145deg, #b02c3a, #d44a5a);
+      border: 2px solid rgba(176, 44, 58, 0.08);
+      pointer-events: none;
+      z-index: 10;
+      box-shadow: 0 0 100px rgba(176, 44, 58, 0.06);
+      backdrop-filter: blur(2px);
+    }
+    .deco-circle-bottom::after {
+      content: '';
+      position: absolute;
+      bottom: 40px;
+      right: 40px;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(176, 44, 58, 0.08), transparent 70%);
+    }
+
+    .dashboard-wrapper {
+      width: 100%;
+      position: relative;
+      z-index: 20;
+    }
+
+    /* header */
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem 1.5rem;
+      margin-bottom: 2.5rem;
+      background: white;
+      padding: 1.25rem 2rem;
+      border-radius: 40px 12px 40px 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.02);
+      border: 1px solid rgba(176, 44, 58, 0.12);
+    }
+    .admin-header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .admin-header-left .logo-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50% 20% 50% 10%;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #f9f7f2;
+      box-shadow: 0 6px 12px rgba(176, 44, 58, 0.20);
+    }
+    .admin-header-left .logo-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .admin-header-left h1 {
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: #a82b36;
+      letter-spacing: -0.3px;
+    }
+    .admin-header-left span.sub {
+      font-weight: 400;
+      color: #7f6b3a;
+      font-size: 0.9rem;
+      background: #f3efe6;
+      padding: 0.2rem 1rem;
+      border-radius: 40px;
+      margin-left: 0.5rem;
+    }
+    .admin-header-right {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+    }
+    .admin-header-right .badge {
+      background: #f3efe6;
+      padding: 0.4rem 1.2rem;
+      border-radius: 60px;
+      font-size: 0.8rem;
+      color: #5a4e3a;
+      border: 1px solid #eae3d4;
+    }
+    .admin-header-right .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #b02c3a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      box-shadow: 0 4px 8px rgba(176, 44, 58, 0.2);
+    }
+
+    /* stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 28px 12px 28px 12px;
+      padding: 1.5rem 1.2rem;
+      border: 1px solid rgba(176, 44, 58, 0.10);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+      transition: 0.2s;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(2px);
+    }
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(176, 44, 58, 0.06);
+    }
+    .stat-card .stat-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #7f6b3a;
+      font-weight: 500;
+      margin-bottom: 0.3rem;
+    }
+    .stat-card .stat-number {
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: #a82b36;
+      line-height: 1.1;
+      margin-bottom: 0.1rem;
+    }
+    .stat-card .stat-sub {
+      font-size: 0.75rem;
+      color: #9b8a72;
+      border-top: 1px solid #f0ebe1;
+      padding-top: 0.4rem;
+      margin-top: 0.2rem;
+    }
+    .stat-card.gold-light {
+      background: linear-gradient(145deg, #fcf6f4, #f9edeb);
+      border-color: #b02c3a;
+    }
+
+    /* info cards */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.8rem;
+      margin-bottom: 2rem;
+    }
+    .info-card {
+      background: white;
+      border-radius: 32px 12px 32px 12px;
+      padding: 1.6rem 1.5rem;
+      border: 1px solid rgba(176, 44, 58, 0.08);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+      transition: 0.15s;
+      backdrop-filter: blur(2px);
+    }
+    .info-card:hover {
+      box-shadow: 0 10px 28px rgba(176, 44, 58, 0.04);
+    }
+    .info-card .card-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #5a4e3a;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #f3efe6;
+      padding-bottom: 0.6rem;
+    }
+    .info-card .card-title .emoji-badge {
+      background: #b02c3a;
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50% 10% 50% 10%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+    .info-card .row-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid #f5f2eb;
+      font-size: 0.9rem;
+    }
+    .info-card .row-item:last-child {
+      border-bottom: none;
+    }
+    .info-card .row-item .label {
+      color: #7f6b3a;
+      font-weight: 400;
+    }
+    .info-card .row-item .value {
+      font-weight: 500;
+      color: #2b2418;
+    }
+    .info-card .row-item .value.gold {
+      color: #a82b36;
+      font-weight: 600;
+    }
+
+    .mini-list {
+      margin-top: 0.2rem;
+    }
+    .mini-list .list-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.3rem 0;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #f5f2eb;
+    }
+    .mini-list .list-item:last-child {
+      border-bottom: none;
+    }
+    .list-item .indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #b02c3a;
+      flex-shrink: 0;
+    }
+    .list-item .indicator.gold {
+      background: #b02c3a;
+    }
+    .list-item .indicator.muted {
+      background: #c9bda8;
+    }
+
+    /* pie grid */
+    .pie-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.8rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 700px) {
+      .pie-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .pie-card {
+      background: white;
+      border-radius: 32px 12px 32px 12px;
+      padding: 1.6rem 1.2rem 1.2rem;
+      border: 1px solid rgba(176, 44, 58, 0.08);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+      transition: 0.15s;
+    }
+    .pie-card:hover {
+      box-shadow: 0 10px 28px rgba(176, 44, 58, 0.04);
+    }
+    .pie-card .card-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #5a4e3a;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.8rem;
+      border-bottom: 2px solid #f3efe6;
+      padding-bottom: 0.6rem;
+    }
+    .pie-card .card-title .emoji-badge {
+      background: #b02c3a;
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50% 10% 50% 10%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+    .pie-chart-container {
+      position: relative;
+      height: 220px;
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto;
+    }
+    @media (min-width: 600px) {
+      .pie-chart-container {
+        height: 250px;
+        max-width: 320px;
+      }
+    }
+    .pie-chart-container canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+    }
+    .pie-note {
+      font-size: 0.7rem;
+      color: #9b8a72;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+
+    /* ——— RESPONSIVE ——— */
+    @media (max-width: 1024px) {
+      .main-content { padding: 1.5rem 1rem; }
+      .admin-header { padding: 1rem 1.5rem; }
+      .admin-header-left h1 { font-size: 1.3rem; }
+      .stats-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; }
+      .stat-card .stat-number { font-size: 2rem; }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 56px;
+        padding: 1rem 0.4rem;
+        gap: 1.8rem;
+      }
+      .sidebar:hover {
+        width: 160px;
+        padding: 1rem 0.6rem;
+      }
+      .sidebar:hover .logo-text { font-size: 0.8rem; }
+      .sidebar:hover .nav-label { font-size: 0.8rem; }
+      .logo-mini .icon { width: 34px; height: 34px; }
+      .main-content { padding: 1rem 0.7rem; }
+      .admin-header {
+        padding: 0.8rem 1rem;
+        border-radius: 28px 10px 28px 10px;
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        gap: 0.8rem;
+      }
+      .admin-header-left { justify-content: center; }
+      .admin-header-left h1 { font-size: 1.2rem; }
+      .admin-header-left span.sub { font-size: 0.75rem; padding: 0.15rem 0.8rem; }
+      .admin-header-right { justify-content: center; }
+      .admin-header-right .badge { font-size: 0.7rem; padding: 0.3rem 0.8rem; }
+      .admin-header-right .avatar { width: 34px; height: 34px; font-size: 0.85rem; }
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+      .stat-card { padding: 1rem 0.8rem; border-radius: 20px 10px 20px 10px; }
+      .stat-card .stat-number { font-size: 1.6rem; }
+      .stat-card .stat-label { font-size: 0.65rem; }
+      .info-grid { grid-template-columns: 1fr; gap: 1rem; }
+      .info-card { padding: 1.2rem 1rem; border-radius: 24px 10px 24px 10px; }
+      .pie-grid { gap: 1rem; }
+      .pie-card { padding: 1.2rem 0.8rem; }
+      .pie-chart-container { height: 180px; max-width: 240px; }
+      .mini-list .list-item { font-size: 0.8rem; padding: 0.2rem 0; }
+      .info-card .row-item { font-size: 0.8rem; padding: 0.3rem 0; }
+    }
+
+    @media (max-width: 480px) {
+      .sidebar {
+        width: 48px;
+        padding: 0.8rem 0.3rem;
+      }
+      .sidebar:hover {
+        width: 140px;
+        padding: 0.8rem 0.5rem;
+      }
+      .sidebar:hover .logo-text { font-size: 0.7rem; }
+      .sidebar:hover .nav-label { font-size: 0.7rem; }
+      .logo-mini .icon { width: 30px; height: 30px; }
+      .nav-btn .nav-icon { font-size: 1.2rem; width: 22px; }
+      .nav-btn { padding: 0.4rem 0.5rem; font-size: 0.8rem; }
+      .main-content { padding: 0.7rem 0.5rem; }
+      .admin-header { padding: 0.6rem 0.8rem; }
+      .admin-header-left h1 { font-size: 1rem; }
+      .admin-header-left .logo-icon { width: 34px; height: 34px; }
+      .stats-grid { grid-template-columns: 1fr; gap: 0.7rem; }
+      .stat-card { padding: 0.8rem 0.7rem; }
+      .stat-card .stat-number { font-size: 1.4rem; }
+      .info-card { padding: 1rem 0.8rem; }
+      .pie-chart-container { height: 160px; max-width: 200px; }
+      .pie-note { font-size: 0.6rem; }
+      .pie-card .card-title { font-size: 0.8rem; }
+      .pie-card .card-title .emoji-badge { width: 22px; height: 22px; font-size: 0.7rem; }
+      .deco-circle-top, .deco-circle-bottom { display: none; }
+    }
+
+    /* scrollable list on small screens */
+    .mini-list-scroll {
+      max-height: 200px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    @media (max-width: 480px) {
+      .mini-list-scroll { max-height: 150px; }
+    }
+    .mini-list-scroll::-webkit-scrollbar { width: 4px; }
+    .mini-list-scroll::-webkit-scrollbar-thumb { background: #b02c3a; border-radius: 20px; }
+    .mini-list-scroll::-webkit-scrollbar-track { background: #f0ebe1; }
+  </style>
+</head>
+<body>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="logo-mini">
+      <span class="icon">
+        <img src="logo.png" alt="FCOL Logo" />
+      </span>
+      <span class="logo-text">FCOL</span>
+    </div>
+
+    <div class="nav-section">
+      <button class="nav-btn active" onclick="setActive(this)">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Dashboard</span>
+      </button>
+      <button class="nav-btn" onclick="location.href='accounts.html'">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">Accounts</span>
+      </button>
+    </div>
+
+    <div class="sidebar-footer">v0.1</div>
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="main-content">
+    <div class="deco-circle-top"></div>
+    <div class="deco-circle-bottom"></div>
+
+    <div class="dashboard-wrapper">
+
+      <!-- header -->
+      <header class="admin-header">
+        <div class="admin-header-left">
+          <div class="logo-icon">
+            <img src="logo.png" alt="FCOL Logo" />
+          </div>
+          <h1>FCOL · Admin</h1>
+          <span class="sub">Laguna</span>
+        </div>
+        <div class="admin-header-right">
+          <span class="badge">👤 Director</span>
+          <div class="avatar">JD</div>
+        </div>
+      </header>
+
+      <!-- stats -->
+      <section class="stats-grid">
+        <div class="stat-card gold-light">
+          <div class="stat-label">Total Members</div>
+          <div class="stat-number">2,483</div>
+          <div class="stat-sub">+124 this month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pending Verifications</div>
+          <div class="stat-number">43</div>
+          <div class="stat-sub">ID / documents</div>
+        </div>
+      </section>
+
+      <!-- info cards -->
+      <section class="info-grid">
+        <div class="info-card">
+          <div class="card-title"><span class="emoji-badge">✦</span> Sectoral Membership</div>
+          <div class="mini-list mini-list-scroll">
+            <div class="list-item"><span class="indicator gold"></span> Youth (18+) <span class="ml-auto text-sm font-medium text-[#a82b36]">420</span></div>
+            <div class="list-item"><span class="indicator gold"></span> Seniors <span class="ml-auto text-sm font-medium text-[#a82b36]">312</span></div>
+            <div class="list-item"><span class="indicator gold"></span> PWDs <span class="ml-auto text-sm font-medium text-[#a82b36]">148</span></div>
+            <div class="list-item"><span class="indicator gold"></span> LGBTQIA+ <span class="ml-auto text-sm font-medium text-[#a82b36]">197</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Farmers <span class="ml-auto text-sm font-medium text-[#a82b36]">205</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Vendors <span class="ml-auto text-sm font-medium text-[#a82b36]">134</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Transport <span class="ml-auto text-sm font-medium text-[#a82b36]">89</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Kababaihan <span class="ml-auto text-sm font-medium text-[#a82b36]">178</span></div>
+          </div>
+          <div class="text-xs text-[#9b8a72] mt-2">* based on registered members</div>
+        </div>
+
+        <div class="info-card">
+          <div class="card-title"><span class="emoji-badge">📍</span> Registered accounts per city</div>
+          <div class="mini-list mini-list-scroll">
+            <div class="list-item"><span class="indicator gold"></span> San Pedro <span class="ml-auto text-sm font-medium text-[#a82b36]">312</span></div>
+            <div class="list-item"><span class="indicator gold"></span> Bay <span class="ml-auto text-sm font-medium text-[#a82b36]">98</span></div>
+            <div class="list-item"><span class="indicator gold"></span> Cabuyao <span class="ml-auto text-sm font-medium text-[#a82b36]">145</span></div>
+            <div class="list-item"><span class="indicator gold"></span> Los Baños <span class="ml-auto text-sm font-medium text-[#a82b36]">173</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Alaminos <span class="ml-auto text-sm font-medium text-[#a82b36]">67</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Calauan <span class="ml-auto text-sm font-medium text-[#a82b36]">52</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Liliw <span class="ml-auto text-sm font-medium text-[#a82b36]">41</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Nagcarlan <span class="ml-auto text-sm font-medium text-[#a82b36]">63</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Rizal <span class="ml-auto text-sm font-medium text-[#a82b36]">38</span></div>
+            <div class="list-item"><span class="indicator muted"></span> San Pablo <span class="ml-auto text-sm font-medium text-[#a82b36]">211</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Victoria <span class="ml-auto text-sm font-medium text-[#a82b36]">44</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Cavinti <span class="ml-auto text-sm font-medium text-[#a82b36]">28</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Famy <span class="ml-auto text-sm font-medium text-[#a82b36]">19</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Kalayaan <span class="ml-auto text-sm font-medium text-[#a82b36]">22</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Luisiana <span class="ml-auto text-sm font-medium text-[#a82b36]">31</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Lumban <span class="ml-auto text-sm font-medium text-[#a82b36]">35</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Mabitac <span class="ml-auto text-sm font-medium text-[#a82b36]">24</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Magdalena <span class="ml-auto text-sm font-medium text-[#a82b36]">29</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Majayjay <span class="ml-auto text-sm font-medium text-[#a82b36]">33</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Paete <span class="ml-auto text-sm font-medium text-[#a82b36]">40</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Pagsanjan <span class="ml-auto text-sm font-medium text-[#a82b36]">46</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Pakil <span class="ml-auto text-sm font-medium text-[#a82b36]">27</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Pangil <span class="ml-auto text-sm font-medium text-[#a82b36]">30</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Pila <span class="ml-auto text-sm font-medium text-[#a82b36]">48</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Santa Cruz <span class="ml-auto text-sm font-medium text-[#a82b36]">186</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Santa Maria <span class="ml-auto text-sm font-medium text-[#a82b36]">42</span></div>
+            <div class="list-item"><span class="indicator muted"></span> Siniloan <span class="ml-auto text-sm font-medium text-[#a82b36]">37</span></div>
+            <div class="list-item"><span class="indicator gold"></span> Biñan <span class="ml-auto text-sm font-medium text-[#a82b36]">247</span></div>
+            <div class="list-item"><span class="indicator gold"></span> Calamba <span class="ml-auto text-sm font-medium text-[#a82b36]">298</span></div>
+            <div class="list-item"><span class="indicator gold"></span> Santa Rosa <span class="ml-auto text-sm font-medium text-[#a82b36]">284</span></div>
+          </div>
+          <div class="text-xs text-[#9b8a72] mt-1">Total 26 cities / municipalities</div>
+        </div>
+
+        <div class="info-card">
+          <div class="card-title"><span class="emoji-badge">👥</span> Age &amp; Gender</div>
+          <div style="margin-bottom: 0.6rem;">
+            <div class="text-xs font-semibold text-[#7f6b3a] uppercase tracking-wide mb-1">Age groups</div>
+            <div class="row-item"><span class="label">0 – 17</span><span class="value gold">215</span></div>
+            <div class="row-item"><span class="label">18 – 29</span><span class="value gold">612</span></div>
+            <div class="row-item"><span class="label">30 – 44</span><span class="value gold">734</span></div>
+            <div class="row-item"><span class="label">45 – 59</span><span class="value gold">498</span></div>
+            <div class="row-item"><span class="label">60 – 74</span><span class="value gold">312</span></div>
+            <div class="row-item"><span class="label">75+</span><span class="value gold">112</span></div>
+          </div>
+          <div>
+            <div class="text-xs font-semibold text-[#7f6b3a] uppercase tracking-wide mb-1">Gender</div>
+            <div class="row-item"><span class="label">Male</span><span class="value gold">1,283</span></div>
+            <div class="row-item"><span class="label">Female</span><span class="value gold">1,187</span></div>
+            <div class="row-item"><span class="label">Prefer not to say</span><span class="value">13</span></div>
+          </div>
+          <div class="text-xs text-[#9b8a72] mt-2">* based on self-reported data</div>
+        </div>
+
+        <div class="info-card">
+          <div class="card-title"><span class="emoji-badge">🪪</span> Government ID Status</div>
+          <div class="row-item"><span class="label">With valid ID</span><span class="value gold">1,876</span></div>
+          <div class="row-item"><span class="label">Pending upload</span><span class="value">312</span></div>
+          <div class="row-item"><span class="label">Rejected</span><span class="value">295</span></div>
+          <div class="row-item"><span class="label">National ID used</span><span class="value">842</span></div>
+          <div class="row-item"><span class="label">Driver's License</span><span class="value">394</span></div>
+          <div class="row-item"><span class="label">Barangay ID</span><span class="value">287</span></div>
+          <div class="row-item"><span class="label">Others (SSS, PhilHealth, etc.)</span><span class="value">353</span></div>
+          <div class="text-xs text-[#9b8a72] mt-1">* last updated: today</div>
+        </div>
+      </section>
+
+      <!-- pie charts -->
+      <section class="pie-grid">
+        <div class="pie-card">
+          <div class="card-title"><span class="emoji-badge">📊</span> Sectoral Membership</div>
+          <div class="pie-chart-container">
+            <canvas id="pieSectoral" width="300" height="250"></canvas>
+          </div>
+          <div class="pie-note">Youth · Seniors · PWDs · LGBTQIA+ · Farmers · Vendors · Transport · Kababaihan</div>
+        </div>
+        <div class="pie-card">
+          <div class="card-title"><span class="emoji-badge">📊</span> Top cities by registrations</div>
+          <div class="pie-chart-container">
+            <canvas id="pieCities" width="300" height="250"></canvas>
+          </div>
+          <div class="pie-note">San Pedro · Calamba · Santa Rosa · Biñan · San Pablo · Santa Cruz · Los Baños · Cabuyao</div>
+        </div>
+      </section>
+
+      <!-- footer -->
+      <div class="text-xs text-[#b8aa92] text-center mt-6 border-t border-[#ece6db] pt-4 flex flex-wrap justify-center gap-4">
+        <span>Federated Civic Organization of Laguna Inc.</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Sidebar active toggle
+    function setActive(btn) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    // Pie charts
+    (function() {
+      const ctx1 = document.getElementById('pieSectoral').getContext('2d');
+      new Chart(ctx1, {
+        type: 'pie',
+        data: {
+          labels: ['Youth', 'Seniors', 'PWDs', 'LGBTQIA+', 'Farmers', 'Vendors', 'Transport', 'Kababaihan'],
+          datasets: [{
+            data: [420, 312, 148, 197, 205, 134, 89, 178],
+            backgroundColor: ['#b02c3a', '#d44a5a', '#a82b36', '#e07a85', '#c9bda8', '#a6927a', '#d4b87a', '#e3d1a0'],
+            borderColor: '#f9f7f2',
+            borderWidth: 2,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 12, padding: 8, font: { size: 10, family: 'Poppins' }, color: '#5a4e3a' } }
+          },
+          cutout: '0%'
+        }
+      });
+
+      const ctx2 = document.getElementById('pieCities').getContext('2d');
+      new Chart(ctx2, {
+        type: 'pie',
+        data: {
+          labels: ['San Pedro', 'Calamba', 'Santa Rosa', 'Biñan', 'San Pablo', 'Santa Cruz', 'Los Baños', 'Cabuyao'],
+          datasets: [{
+            data: [312, 298, 284, 247, 211, 186, 173, 145],
+            backgroundColor: ['#a82b36', '#b02c3a', '#d44a5a', '#e07a85', '#c9bda8', '#a6927a', '#d4b87a', '#e3d1a0'],
+            borderColor: '#f9f7f2',
+            borderWidth: 2,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 12, padding: 8, font: { size: 10, family: 'Poppins' }, color: '#5a4e3a' } }
+          },
+          cutout: '0%'
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
